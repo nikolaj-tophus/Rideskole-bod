@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rideskole Snackbod</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f4f4f4;
+text-align:center;
+padding:20px;
+}
+
+h1{
+margin-bottom:10px;
+}
+
+.container{
+max-width:500px;
+margin:auto;
+}
+
+.item{
+background:white;
+padding:20px;
+margin:10px 0;
+border-radius:10px;
+font-size:20px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+button{
+width:100%;
+padding:15px;
+font-size:18px;
+border:none;
+border-radius:8px;
+background:#4CAF50;
+color:white;
+}
+
+button:hover{
+background:#3e8e41;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🐎 Rideskole Snackbod</h1>
+<p>Tryk på varen og betal med MobilePay</p>
+
+<div class="container">
+
+<div class="item">
+🍫 Müslibar – 10 kr
+<button onclick="pay(10)">Betal</button>
+</div>
+
+<div class="item">
+🥔 Chips – 15 kr
+<button onclick="pay(15)">Betal</button>
+</div>
+
+<div class="item">
+🍬 Slikpose – 10 kr
+<button onclick="pay(10)">Betal</button>
+</div>
+
+<div class="item">
+🥤 Sodavand – 20 kr
+<button onclick="pay(20)">Betal</button>
+</div>
+
+<div class="item">
+🍎 Æble – 10 kr
+<button onclick="pay(10)">Betal</button>
+</div>
+
+</div>
+
+<script>
+
+function pay(amount){
+
+let phone="12345678"; // dit MobilePay nummer
+
+window.location.href=
+`mobilepay://send?phone=${phone}&amount=${amount}`;
+
+}
+
+</script>
+
+</body>
+</html>
