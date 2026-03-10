@@ -1,97 +1,73 @@
 <!DOCTYPE html>
-<html lang="da">
+<html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rideskole Snackbod</title>
+<title>Scan vare</title>
+
+<script src="https://unpkg.com/@zxing/library@latest"></script>
 
 <style>
-
 body{
 font-family: Arial;
-background:#f4f4f4;
 text-align:center;
-padding:20px;
+background:#f5f5f5;
 }
 
-h1{
-margin-bottom:10px;
-}
-
-.container{
-max-width:500px;
-margin:auto;
-}
-
-.item{
-background:white;
-padding:20px;
-margin:10px 0;
+video{
+width:100%;
+max-width:400px;
+border:3px solid #333;
 border-radius:10px;
-font-size:20px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
 button{
-width:100%;
+margin-top:20px;
 padding:15px;
 font-size:18px;
-border:none;
-border-radius:8px;
-background:#4CAF50;
-color:white;
 }
-
-button:hover{
-background:#3e8e41;
-}
-
 </style>
 </head>
 
 <body>
 
-<h1>🐎 Rideskole Snackbod</h1>
-<p>Tryk på varen og betal med MobilePay</p>
+<h2>🐎 Scan varen</h2>
+<p>Hold kameraet over stregkoden</p>
 
-<div class="container">
+<video id="video"></video>
 
-<div class="item">
-🍫 Müslibar – 10 kr
-<button onclick="pay(10)">Betal</button>
-</div>
-
-<div class="item">
-🥔 Chips – 15 kr
-<button onclick="pay(15)">Betal</button>
-</div>
-
-<div class="item">
-🍬 Slikpose – 10 kr
-<button onclick="pay(10)">Betal</button>
-</div>
-
-<div class="item">
-🥤 Sodavand – 20 kr
-<button onclick="pay(20)">Betal</button>
-</div>
-
-<div class="item">
-🍎 Æble – 10 kr
-<button onclick="pay(10)">Betal</button>
-</div>
-
-</div>
+<p id="result"></p>
 
 <script>
 
-function pay(amount){
+const codeReader = new ZXing.BrowserBarcodeReader()
+const videoElement = document.getElementById('video')
 
-let phone="12345678"; // dit MobilePay nummer
+codeReader.decodeFromVideoDevice(null, videoElement, (result, err) => {
 
-window.location.href=
-`mobilepay://send?phone=${phone}&amount=${amount}`;
+if(result){
+
+let code = result.text
+document.getElementById("result").innerHTML =
+"Stregkode: " + code
+
+// eksempel på vare mapping
+let prices = {
+"57095967":20,
+"5709876543210":15
+}
+
+if(prices[code]){
+
+let amount = prices[code]
+
+window.location.href =
+`mobilepay://send?phone=12345678&amount=${amount}`
 
 }
+
+}
+
+})
 
 </script>
 
