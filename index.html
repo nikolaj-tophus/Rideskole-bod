@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bæklunds Snackbod</title>
+<title>Rideskole Snackbod</title>
 
 <script src="https://unpkg.com/@zxing/library@latest"></script>
 
@@ -91,7 +91,7 @@ background:#e74c3c !important;
 
 <h2>Total: <span id="total">0</span> kr</h2>
 
-<button class="pay" onclick="pay()">Betal</button>
+<button class="pay" onclick="pay()">Betal med MobilePay</button>
 <button class="clear" onclick="clearCart()">Tøm kurv</button>
 
 </div>
@@ -108,7 +108,7 @@ let lastScanTime=0
 let cart={}
 let total=0
 
-// DINE VARER
+// PRODUKTER
 
 let products={
 
@@ -230,7 +230,15 @@ alert("Ingen varer scannet")
 return
 }
 
-alert("Betal "+total+" kr til MobilePay\n\n60651909")
+let phone="60651909"
+let amount=total
+
+window.location.href=`mobilepay://send?phone=${phone}&amount=${amount}`
+
+// fallback hvis MobilePay ikke åbner
+setTimeout(()=>{
+alert("Hvis MobilePay ikke åbner:\nSend "+amount+" kr til "+phone)
+},1500)
 
 }
 
