@@ -2,72 +2,177 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scan vare</title>
+<title>Rideskole Snackbod</title>
 
 <script src="https://unpkg.com/@zxing/library@latest"></script>
 
 <style>
+
 body{
-font-family: Arial;
+font-family:Arial;
 text-align:center;
-background:#f5f5f5;
+background:#f4f4f4;
+margin:0;
+padding:20px;
+}
+
+h2{
+margin-bottom:10px;
 }
 
 video{
 width:100%;
-max-width:400px;
+max-width:420px;
+border-radius:12px;
 border:3px solid #333;
-border-radius:10px;
+}
+
+#cart{
+background:white;
+padding:20px;
+margin-top:20px;
+border-radius:12px;
+box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+ul{
+list-style:none;
+padding:0;
+}
+
+li{
+padding:8px;
+border-bottom:1px solid #eee;
 }
 
 button{
-margin-top:20px;
 padding:15px;
 font-size:18px;
+border:none;
+border-radius:10px;
+margin-top:10px;
+width:100%;
 }
+
+.pay{
+background:#4CAF50;
+color:white;
+}
+
+.clear{
+background:#ff5252;
+color:white;
+}
+
 </style>
 </head>
 
 <body>
 
-<h2>🐎 Scan varen</h2>
-<p>Hold kameraet over stregkoden</p>
+<h2>🐎 Rideskole Snackbod</h2>
+<p>Scan dine varer</p>
 
 <video id="video"></video>
 
-<p id="result"></p>
+<div id="cart">
+
+<h3>Indkøb</h3>
+
+<ul id="items"></ul>
+
+<h3>Total: <span id="total">0</span> kr</h3>
+
+<button class="pay" onclick="pay()">Betal med MobilePay</button>
+
+<button class="clear" onclick="clearCart()">Tøm kurv</button>
+
+</div>
 
 <script>
 
 const codeReader = new ZXing.BrowserBarcodeReader()
-const videoElement = document.getElementById('video')
 
-codeReader.decodeFromVideoDevice(null, videoElement, (result, err) => {
+const video = document.getElementById("video")
+
+let cart=[]
+let total=0
+
+// vare database
+let products={
+
+"57095967":{name:"Sodavand",price:20},
+"7040280012570":{name:"Chips",price:15},
+"570830008411":{name:"Müslibar",price:10},
+"7310350133840":{name:"Slikpose",price:10}
+
+}
+
+codeReader.decodeFromVideoDevice(null,video,(result,err)=>{
 
 if(result){
 
-let code = result.text
-document.getElementById("result").innerHTML =
-"Stregkode: " + code
+let code=result.text
 
-// eksempel på vare mapping
-let prices = {
-"57095967":20,
-"5709876543210":15
-}
+if(products[code]){
 
-if(prices[code]){
-
-let amount = prices[code]
-
-window.location.href =
-`mobilepay://send?phone=12345678&amount=${amount}`
+addProduct(products[code])
 
 }
 
 }
 
 })
+
+function addProduct(product){
+
+cart.push(product)
+
+total+=product.price
+
+updateCart()
+
+}
+
+function updateCart(){
+
+let list=document.getElementById("items")
+
+list.innerHTML=""
+
+cart.forEach(p=>{
+
+let li=document.createElement("li")
+
+li.innerText=p.name+" - "+p.price+" kr"
+
+list.appendChild(li)
+
+})
+
+document.getElementById("total").innerText=total
+
+}
+
+function pay(){
+
+let phone="60651909"
+
+if(total===0){
+alert("Du har ikke scannet nogen varer")
+return
+}
+
+window.location.href=`mobilepay://send?phone=${phone}&amount=${total}`
+
+}
+
+function clearCart(){
+
+cart=[]
+total=0
+updateCart()
+
+}
 
 </script>
 
