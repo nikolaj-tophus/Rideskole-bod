@@ -10,19 +10,15 @@
 
 body{
 font-family:Arial;
+background:#f2f2f2;
 text-align:center;
-background:#f4f4f4;
-margin:0;
 padding:20px;
-}
-
-h2{
-margin-bottom:10px;
+transition:background 0.3s;
 }
 
 video{
 width:100%;
-max-width:420px;
+max-width:400px;
 border-radius:12px;
 border:3px solid #333;
 }
@@ -32,36 +28,51 @@ background:white;
 padding:20px;
 margin-top:20px;
 border-radius:12px;
-box-shadow:0 3px 8px rgba(0,0,0,0.1);
 }
 
-ul{
-list-style:none;
-padding:0;
-}
-
-li{
+.item{
+display:flex;
+justify-content:space-between;
+align-items:center;
 padding:8px;
 border-bottom:1px solid #eee;
 }
 
 button{
-padding:15px;
-font-size:18px;
+padding:12px;
+font-size:16px;
 border:none;
-border-radius:10px;
+border-radius:8px;
 margin-top:10px;
-width:100%;
+}
+
+.remove{
+background:#e74c3c;
+color:white;
+padding:6px 10px;
+font-size:14px;
 }
 
 .pay{
-background:#4CAF50;
+background:#27ae60;
 color:white;
+width:100%;
 }
 
 .clear{
-background:#ff5252;
+background:#c0392b;
 color:white;
+width:100%;
+}
+
+/* blink farver */
+
+.flash-green{
+background:#2ecc71 !important;
+}
+
+.flash-red{
+background:#e74c3c !important;
 }
 
 </style>
@@ -78,12 +89,11 @@ color:white;
 
 <h3>Indkøb</h3>
 
-<ul id="items"></ul>
+<div id="items"></div>
 
-<h3>Total: <span id="total">0</span> kr</h3>
+<h2>Total: <span id="total">0</span> kr</h2>
 
-<button class="pay" onclick="pay()">Betal med MobilePay</button>
-
+<button class="pay" onclick="pay()">Betal</button>
 <button class="clear" onclick="clearCart()">Tøm kurv</button>
 
 </div>
@@ -92,40 +102,63 @@ color:white;
 
 const codeReader = new ZXing.BrowserBarcodeReader()
 
-const video = document.getElementById("video")
+let lastCode=""
+let lastScanTime=0
 
-let cart=[]
+let cart={}
 let total=0
 
-// vare database
+// PRODUKTER
+
 let products={
 
-"57095967":{name:"Sodavand",price:20},
-"7040280012570":{name:"Chips",price:15},
-"570830008411":{name:"Müslibar",price:10},
-"7310350133840":{name:"Slikpose",price:10}
+"5701234567890":{name:"Sodavand",price:20},
+"5709876543210":{name:"Chips",price:15},
+"5701111111111":{name:"Müslibar",price:10},
+"5702222222222":{name:"Slikpose",price:10}
 
 }
 
-codeReader.decodeFromVideoDevice(null,video,(result,err)=>{
+// START SCANNER
+
+codeReader.decodeFromVideoDevice(null,'video',(result,err)=>{
 
 if(result){
 
 let code=result.text
+let now=Date.now()
+
+if(code===lastCode && now-lastScanTime<2000){
+return
+}
+
+lastCode=code
+lastScanTime=now
 
 if(products[code]){
-
-addProduct(products[code])
-
+addProduct(code)
+flashGreen()
+vibrate()
+}else{
+flashRed()
+vibrate()
 }
 
 }
 
 })
 
-function addProduct(product){
+// LÆG VARE I KURV
 
-cart.push(product)
+function addProduct(code){
+
+let product=products[code]
+
+if(!cart[code]){
+cart[code]={...product,qty:1}
+}else{
+cart[code].qty++
+}
 
 total+=product.price
 
@@ -133,44 +166,110 @@ updateCart()
 
 }
 
+// FJERN VARE
+
+function removeProduct(code){
+
+let item=cart[code]
+
+if(item.qty>1){
+
+item.qty--
+total-=item.price
+
+}else{
+
+total-=item.price
+delete cart[code]
+
+}
+
+updateCart()
+
+}
+
+// OPDATER KURV
+
 function updateCart(){
 
-let list=document.getElementById("items")
+let container=document.getElementById("items")
+container.innerHTML=""
 
-list.innerHTML=""
+for(let code in cart){
 
-cart.forEach(p=>{
+let item=cart[code]
 
-let li=document.createElement("li")
+let div=document.createElement("div")
+div.className="item"
 
-li.innerText=p.name+" - "+p.price+" kr"
+div.innerHTML=`
+<span>${item.name} x${item.qty}</span>
+<span>${item.price*item.qty} kr</span>
+<button class="remove" onclick="removeProduct('${code}')">−</button>
+`
 
-list.appendChild(li)
+container.appendChild(div)
 
-})
+}
 
 document.getElementById("total").innerText=total
 
 }
 
+// BETAL
+
 function pay(){
 
-let phone="60651909"
-
 if(total===0){
-alert("Du har ikke scannet nogen varer")
+alert("Ingen varer scannet")
 return
 }
 
-window.location.href=`mobilepay://send?phone=${phone}&amount=${total}`
+alert("Betal "+total+" kr til MobilePay\n\n60651909")
 
 }
 
+// TØM KURV
+
 function clearCart(){
 
-cart=[]
+cart={}
 total=0
 updateCart()
+
+}
+
+// GRØN BLINK
+
+function flashGreen(){
+
+document.body.classList.add("flash-green")
+
+setTimeout(()=>{
+document.body.classList.remove("flash-green")
+},300)
+
+}
+
+// RØD BLINK
+
+function flashRed(){
+
+document.body.classList.add("flash-red")
+
+setTimeout(()=>{
+document.body.classList.remove("flash-red")
+},300)
+
+}
+
+// VIBRATION
+
+function vibrate(){
+
+if(navigator.vibrate){
+navigator.vibrate(200)
+}
 
 }
 
