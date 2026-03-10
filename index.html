@@ -65,8 +65,6 @@ color:white;
 width:100%;
 }
 
-/* blink farver */
-
 .flash-green{
 background:#2ecc71 !important;
 }
@@ -100,6 +98,8 @@ background:#e74c3c !important;
 
 <script>
 
+const beep = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg")
+
 const codeReader = new ZXing.BrowserBarcodeReader()
 
 let lastCode=""
@@ -108,7 +108,7 @@ let lastScanTime=0
 let cart={}
 let total=0
 
-// PRODUKTER
+// DINE VARER
 
 let products={
 
@@ -136,12 +136,17 @@ lastCode=code
 lastScanTime=now
 
 if(products[code]){
+
 addProduct(code)
 flashGreen()
+beep.play()
 vibrate()
+
 }else{
+
 flashRed()
-vibrate()
+beep.play()
+
 }
 
 }
@@ -268,7 +273,7 @@ document.body.classList.remove("flash-red")
 function vibrate(){
 
 if(navigator.vibrate){
-navigator.vibrate(200)
+navigator.vibrate([100,50,100])
 }
 
 }
